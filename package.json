@@ -1,0 +1,36 @@
+{
+  "name": "lyma",
+  "version": "1.0.0",
+  "description": "Yet another UI framework",
+  "main": "src/index.js",
+  "scripts": {
+    "watch": "rollup -c rollup-examples.config.js --watch",
+    "serve": "static-server example",
+    "start": "run-p serve watch",
+    "test": "cross-env BABEL_ENV=test ava"
+  },
+  "author": "Riad Benguella",
+  "license": "MIT",
+  "devDependencies": {
+    "ava": "^0.22.0",
+    "babel-core": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "browser-env": "^3.2.0",
+    "cross-env": "^5.0.5",
+    "npm-run-all": "^4.1.1",
+    "prettier": "^1.6.1",
+    "rollup": "^0.49.2",
+    "rollup-plugin-babel": "^3.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "static-server": "^2.0.5"
+  },
+  "ava": {
+    "tape": true,
+    "require": ["babel-register", "./test/helpers/setup-browser.js"]
+  },
+  "babel": {
+    "presets": ["env"],
+    "plugins": ["transform-object-rest-spread"]
+  }
+}
