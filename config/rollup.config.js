@@ -1,12 +1,14 @@
-// rollup.config.js
 import resolve from "rollup-plugin-node-resolve";
 import babel from "rollup-plugin-babel";
 
 export default {
-  input: "example/index.js",
+  strict: true,
+  input: "src/index.js",
   output: {
-    file: "example/build/bundle.js",
-    format: "iife"
+    format: "iife",
+    file: "dist/lyma.js",
+    name: "lyma",
+    sourcemap: true
   },
   plugins: [
     resolve(),

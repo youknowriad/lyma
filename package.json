@@ -1,13 +1,28 @@
 {
   "name": "lyma",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Yet another UI framework",
-  "main": "src/index.js",
+  "main": "dist/lyma.js",
+  "jsnext:main": "dist/lyma.esm.js",
+  "module": "dist/lyma.esm.js",
+  "minified:main": "dist/lyma.min.js",
   "scripts": {
-    "watch": "rollup -c rollup-examples.config.js --watch",
-    "serve": "static-server example",
-    "start": "run-p serve watch",
-    "test": "cross-env BABEL_ENV=test ava"
+    "clean": "rimraf dist",
+    "build": "run-s clean transpile minify size",
+    "transpile": "run-p transpile:main transpile:esm",
+    "transpile:main": "rollup -c config/rollup.config.js",
+    "transpile:esm": "rollup -c config/rollup.config.esm.js",
+    "minify":
+      "uglifyjs dist/lyma.js --in-source-map dist/lyma.js.map -c -m --source-map -o dist/lyma.min.js",
+    "size":
+      "node -e \"process.stdout.write('gzip size: ')\" && gzip-size --raw dist/lyma.min.js",
+    "example:watch": "rollup -c config/rollup.config.example.js --watch",
+    "example:serve": "static-server example",
+    "start": "run-p example:serve example:watch",
+    "test": "cross-env BABEL_ENV=test ava",
+    "prepublish": "npm run build",
+    "release":
+      "npm run build && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "author": "Riad Benguella",
   "license": "MIT",
@@ -18,12 +33,15 @@
     "babel-preset-env": "^1.6.0",
     "browser-env": "^3.2.0",
     "cross-env": "^5.0.5",
+    "gzip-size-cli": "^2.1.0",
     "npm-run-all": "^4.1.1",
     "prettier": "^1.6.1",
+    "rimraf": "^2.6.1",
     "rollup": "^0.49.2",
     "rollup-plugin-babel": "^3.0.2",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "static-server": "^2.0.5"
+    "static-server": "^2.0.5",
+    "uglify-js": "^3.1.0"
   },
   "ava": {
     "tape": true,
