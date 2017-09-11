@@ -48,11 +48,11 @@ test("should return an array chunk if the arrays are different", t => {
     order: [
       {
         chunk: undefined,
-        previous: 0
+        old: 0
       },
       {
         chunk: { type: "string", element: "d", mapping: mapping.children[1] },
-        previous: 1
+        old: 1
       }
     ]
   });
@@ -75,7 +75,7 @@ test("should return an array chunk inserting a new element", t => {
     order: [
       {
         chunk: undefined,
-        previous: 0
+        old: 0
       },
       {
         element: "b"
@@ -103,11 +103,11 @@ test("should match reordered elements with keys", t => {
     order: [
       {
         chunk: undefined,
-        previous: 1
+        old: 1
       },
       {
         chunk: undefined,
-        previous: 0
+        old: 0
       }
     ]
   });
@@ -139,7 +139,7 @@ test("should return a single chunck if the element children are different", t =>
             mapping: mapping.children.children[0],
             type: "string"
           },
-          previous: 0
+          old: 0
         }
       ]
     }

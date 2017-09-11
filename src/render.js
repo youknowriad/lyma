@@ -5,6 +5,7 @@ import {
   isString,
   isFunction
 } from "./utils";
+import { applyProp } from "./dom";
 
 function getMappingType(element) {
   if (isEmptyOrBoolean(element)) {
@@ -77,7 +78,7 @@ export function diff(element, mapping) {
           const previousMapping = mapping.children[previous.index];
           order.push({
             chunk: diff(child, previousMapping),
-            previous: previous.index
+            old: previous.index
           });
         } else {
           order.push({ element: child });
@@ -117,7 +118,11 @@ export function diff(element, mapping) {
         const set = [];
         for (let prop in nextProps) {
           if (!previousProps[prop] || previousProps[prop] !== nextProps[prop]) {
-            set.push({ prop, value: nextProps[prop] });
+            set.push({
+              prop,
+              value: nextProps[prop],
+              old: previousProps[prop]
+            });
           }
         }
 
@@ -209,7 +214,7 @@ export function commit(chunk) {
       }
       if (props && props.set) {
         props.set.forEach(set => {
-          mapping.node[set.prop] = set.value;
+          applyProp(mapping.node, set.prop, set.old, set.value);
         });
       }
       let newChildren = mapping.children;
@@ -228,15 +233,15 @@ export function commit(chunk) {
       let offset = 0;
       const children = [];
       let newNodes = [];
-      order.forEach(({ chunk, element, previous }, index) => {
+      order.forEach(({ chunk, element, old }, index) => {
         let subMapping;
-        if (previous === undefined) {
+        if (old === undefined) {
           subMapping = render(element, mapping.parent, offset);
         } else {
           if (chunk) {
             subMapping = commit(chunk);
           } else {
-            subMapping = mapping.children[previous];
+            subMapping = mapping.children[old];
           }
           if (offset !== subMapping.startIndex) {
             const nodes = subMapping.nodes;
@@ -360,7 +365,7 @@ export function render(element, parent, startIndex = 0) {
       const { type, props, children } = element;
       const node = document.createElement(type);
       for (let prop in props) {
-        node[prop] = props[prop];
+        applyProp(node, prop, undefined, props[prop]);
       }
       const subMapping = render(children, node);
       insertNodeAtPosition(parent, node, startIndex);

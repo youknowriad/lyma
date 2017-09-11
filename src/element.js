@@ -1,10 +1,14 @@
 import { castArray } from "./utils";
 
-export function h(node, props = {}, children = []) {
+export function h(node, props, children) {
+  const { children: childrenProp, ...remainingProps } = props || {};
   return {
     type: node,
-    children: castArray(children),
-    props
+    children:
+      children !== undefined
+        ? castArray(children)
+        : childrenProp ? castArray(childrenProp) : [],
+    props: remainingProps
   };
 }
 
