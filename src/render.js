@@ -195,6 +195,7 @@ export function commit(chunk) {
     case "replace": {
       const { mapping, element } = chunk;
       removeNodes(mapping.parent.childNodes, mapping.index, mapping.next);
+      unmountComponents(mapping);
       return render(element, mapping.parent, mapping.index);
     }
     case "string": {
@@ -316,6 +317,32 @@ function removeNodes(nodeList, start, next) {
   });
 }
 
+export function unmountComponents(mapping) {
+  switch (mapping.type) {
+    case "none":
+      return;
+    case "array":
+      for (let i in mapping.children) {
+        unmountComponents(mapping[i]);
+      }
+      return;
+    case "string":
+      return;
+    case "single":
+      unmountComponents(mapping.children);
+      return;
+    case "function":
+      unmountComponents(mapping.content);
+      return;
+    case "component":
+      // Dispatch mount event
+      mapping.isMounted = false;
+      mapping.dispatch({ type: "UNMOUNT", nodes: subMapping.nodes });
+      unmountComponents(mapping.content);
+      return;
+  }
+}
+
 export function render(element, parent, startIndex = 0) {
   const mappingType = getMappingType(element);
 
@@ -403,7 +430,28 @@ export function render(element, parent, startIndex = 0) {
         state: initialState,
         previousState: initialState,
         dispatch(action) {
-          mapping.state = mapping.element.type.reducer(mapping.state, action);
+          // Trigger side effects
+          if (type.sideeffects) {
+            const abort = type.sideeffects(
+              action,
+              mapping.dispatch,
+              mapping.state
+            );
+            if (abort === false) {
+              return;
+            }
+          }
+
+          // No rerendering if the component is unmounted
+          if (!mapping.isMounted) {
+            return;
+          }
+
+          // Updating the state (reducer)
+          mapping.state = type.reducer(mapping.state, action);
+          if (mapping.state === mapping.previousState) {
+            return;
+          }
           const ownProps = {
             props: mapping.element.props,
             children: mapping.element.children
@@ -425,6 +473,8 @@ export function render(element, parent, startIndex = 0) {
         parent,
         element
       };
+
+      // Render component
       const subMapping = render(
         type.render(ownProps, mapping.state, mapping.dispatch),
         parent
@@ -434,6 +484,10 @@ export function render(element, parent, startIndex = 0) {
       mapping.index = subMapping.index;
       mapping.next = subMapping.next;
       mapping.nodes = subMapping.nodes;
+      mapping.isMounted = true;
+
+      // Dispatch mount event
+      mapping.dispatch({ type: "MOUNT", nodes: subMapping.nodes });
 
       return mapping;
     }

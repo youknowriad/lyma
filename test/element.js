@@ -18,3 +18,12 @@ test("should allow passing the children as a prop", t => {
     children: ["content"]
   });
 });
+
+test("should allow passing children as extra arguments", t => {
+  const element = h("div", {}, h("child"), h("child2"), [h("child3")]);
+  t.deepEqual(element, {
+    type: "div",
+    props: {},
+    children: [h("child"), h("child2"), [h("child3")]]
+  });
+});

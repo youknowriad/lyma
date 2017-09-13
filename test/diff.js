@@ -208,3 +208,38 @@ test("should rerender when dispatching an action", t => {
   mapping.dispatch("increment");
   t.is(document.body.innerHTML, "Counter: 2");
 });
+
+test("should rerender when a side effect dispatches an action", t => {
+  const component = withState(
+    () => 0,
+    (state, action) => (action === "increment" ? state + 1 : state),
+    (action, dispatch) => {
+      if (action === "sideeffect") {
+        dispatch("increment");
+        dispatch("increment");
+      }
+    }
+  )((props, state) => "Counter: " + state);
+  const element = h(component, {});
+  const mapping = render(element, document.body);
+  mapping.dispatch("sideeffect");
+  t.is(document.body.innerHTML, "Counter: 2");
+});
+
+test("should not do anything if the component is already unmounted", t => {
+  const component = withState(
+    () => 0,
+    (state, action) => (action === "increment" ? state + 1 : state),
+    (action, dispatch) => {
+      if (action === "sideeffect") {
+        dispatch("increment");
+        dispatch("increment");
+      }
+    }
+  )((props, state) => "Counter: " + state);
+  const element = h(component, {});
+  const mapping = render(element, document.body);
+  mapping.isMounted = false;
+  mapping.dispatch("sideeffect");
+  t.is(document.body.innerHTML, "Counter: 0");
+});

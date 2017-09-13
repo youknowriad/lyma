@@ -1,20 +1,25 @@
-import { castArray } from "./utils";
+import { castArray, isArray } from "./utils";
 
-export function h(node, props, children) {
+export function h(node, props, ...children) {
   const { children: childrenProp, ...remainingProps } = props || {};
+  let flattendChildren = [];
+  for (let i = 0; i < children.length; i++) {
+    const nextChildren = isArray(children[i]) ? [children[i]] : children[i];
+    flattendChildren = flattendChildren.concat(nextChildren);
+  }
   return {
     type: node,
-    children:
-      children !== undefined
-        ? castArray(children)
-        : childrenProp ? castArray(childrenProp) : [],
+    children: flattendChildren.length
+      ? flattendChildren
+      : childrenProp ? castArray(childrenProp) : [],
     props: remainingProps
   };
 }
 
-export const withState = (initial, reducer) => render => ({
+export const withState = (initial, reducer, sideeffects) => render => ({
   type: "component",
   initial,
   reducer,
-  render
+  render,
+  sideeffects
 });

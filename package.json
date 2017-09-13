@@ -1,6 +1,6 @@
 {
   "name": "lyma",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Yet another UI framework",
   "main": "dist/lyma.js",
   "jsnext:main": "dist/lyma.esm.js",
